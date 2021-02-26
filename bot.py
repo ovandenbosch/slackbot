@@ -15,6 +15,7 @@ slack_event_adapter = SlackEventAdapter(os.environ['SIGNING_SECRET'], '/slack/ev
 client = slack.WebClient(token=os.environ['SLACK_TOKEN'])
 BOT_ID = client.api_call("auth.test")["user_id"]
 
+message_counts = {}
 
 @slack_event_adapter.on('message')
 def message(payload):
@@ -24,10 +25,19 @@ def message(payload):
     text = event.get('text')
     
     if BOT_ID != user_id:
-        client.chat_postMessage(channel=channel_id, text=text)
+        if user_id in message_counts:
+            message_counts[user_id] += 1
+        else:
+            message_counts[user_id] = 1
+        # client.chat_postMessage(channel=channel_id, text=text)
 
 @app.route('/message-count', methods=["POST"])
 def message_count():
+    data = request.form
+    user_id = data.get("user_id")
+    channel_id = data.get("channel_id")
+    message_count = message_counts.get(user_id, 0)
+    client.chat_postMessage(channel=channel_id, text=f"Message: {message_count}")
     return Response(), 200
 
 if __name__ == "__main__":
