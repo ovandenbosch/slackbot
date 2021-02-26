@@ -1,4 +1,12 @@
 import requests
 
-response = requests.get("https://uselessfacts.jsph.pl/random.json?language=en")
-print(response.json()["text"])
+url = "https://ronreiter-meme-generator.p.rapidapi.com/fonts"
+
+headers = {
+    'x-rapidapi-key': "SIGN-UP-FOR-KEY",
+    'x-rapidapi-host': "ronreiter-meme-generator.p.rapidapi.com"
+    }
+
+response = requests.request("GET", url, headers=headers)
+
+print(response.text)
