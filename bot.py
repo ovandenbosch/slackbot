@@ -4,6 +4,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, request, Response
 from slackeventsapi import SlackEventAdapter
+import requests
+import json
 
 # Loading environment variable
 env_path = Path('.') / '.env'
@@ -39,6 +41,18 @@ def message_count():
     message_count = message_counts.get(user_id, 0)
     client.chat_postMessage(channel=channel_id, text=f"Message: {message_count}")
     return Response(), 200
+
+
+@app.route("/random-fact", methods=["POST"])
+def random_fact():
+    data = request.form
+    response = requests.get("https://uselessfacts.jsph.pl/random.json?language=en")
+    user_id = data.get("user_id")
+    channel_id = data.get("channel_id")
+    text = response.json()["text"]
+    client.chat_postMessage(channel=channel_id, text=text)
+    return Response(), 200
+
 
 if __name__ == "__main__":
     app.run(debug=True)
